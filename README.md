@@ -136,13 +136,6 @@ npm run seed                          # server: admin user, sample products and 
 npm run reset-sales -- --yes          # server: delete all sales (add --restock to return stock)
 ```
 
-## Roadmap
-
-- [ ] Partial refunds
-- [ ] Stock adjustment history and suppliers
-- [ ] Customer loyalty points
-- [ ] Deploy guide (Render, Vercel, MongoDB Atlas)
-
 <p align="center">Built by <a href="https://github.com/Atibayounus">Atiba</a></p>
 
 <p align="center">
