@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { protect, adminOnly, wrap } from '../middleware/auth.js';
 import { loginGuard } from '../middleware/rateLimit.js';
+import { logActivity } from '../utils/activity.js';
 
 const router = Router();
 const MIN_PASSWORD = 8;
@@ -39,6 +40,7 @@ router.post('/login', wrap(async (req, res) => {
   const ok = await bcrypt.compare(password, user?.password || DUMMY_HASH);
   if (!user || !ok) {
     loginGuard.fail(key);
+    logActivity({ name: email || 'unknown' }, 'login_failed', `Failed sign-in for ${email || 'no email'} from ${req.ip}`);
     return res.status(401).json({ message: 'Wrong email or password' });
   }
   if (user.active === false) return res.status(403).json({ message: 'This account is disabled. Ask an admin.' });
@@ -48,6 +50,7 @@ router.post('/login', wrap(async (req, res) => {
     await User.updateOne({ _id: user._id }, { mustChangePassword: true });
     user.mustChangePassword = true;
   }
+  logActivity(user, 'login', `Signed in from ${req.ip}`);
   res.json({ token: sign(user), user: publicUser(user) });
 }));
 
@@ -73,6 +76,7 @@ router.post('/password', protect, wrap(async (req, res) => {
   user.passwordChangedAt = new Date();
   user.mustChangePassword = false;
   await user.save();
+  logActivity(req.user, 'password_changed', 'Changed own password');
   res.json({ ok: true, token: sign(user), user: publicUser(user) });
 }));
 
@@ -93,6 +97,7 @@ router.post('/register', protect, adminOnly, wrap(async (req, res) => {
   if (await User.findOne({ email })) throw bad('Email already in use', 409);
   // The admin knows this password, so the new user is asked to change it
   const user = await User.create({ name, email, role, mustChangePassword: true, password: await bcrypt.hash(password, COST) });
+  logActivity(req.user, 'user_created', `Added ${user.email} as ${user.role}`);
   res.status(201).json(publicUser(user));
 }));
 
@@ -116,6 +121,8 @@ router.put('/users/:id', protect, adminOnly, wrap(async (req, res) => {
   }
   const user = await User.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
   if (!user) throw bad('User not found', 404);
+  const changes = [role !== undefined && `role: ${role}`, typeof active === 'boolean' && (active ? 'enabled' : 'disabled'), req.body.password !== undefined && 'password reset', update.name && 'renamed'].filter(Boolean);
+  logActivity(req.user, 'user_updated', `${user.email}: ${changes.join(', ') || 'updated'}`);
   res.json(publicUser(user));
 }));
 

@@ -20,6 +20,8 @@ const PATHS = {
   cash: <><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></>,
   cart: <><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H6" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
+  wallet: <><path d="M3 7a2 2 0 0 1 2-2h13v4" /><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M16 13.5h2" /></>,
+  activity: <path d="M3 12h4l3-8 4 16 3-8h4" />,
 };
 
 export function Icon({ name, className = 'w-5 h-5' }) {

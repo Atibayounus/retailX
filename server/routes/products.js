@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Product from '../models/Product.js';
 import { protect, adminOnly, wrap } from '../middleware/auth.js';
+import { logActivity } from '../utils/activity.js';
 
 const router = Router();
 router.use(protect);
@@ -37,19 +38,26 @@ router.get('/', wrap(async (req, res) => {
 
 router.post('/', adminOnly, wrap(async (req, res) => {
   const { sku, ...rest } = clean(req.body);
-  res.status(201).json(await Product.create({ ...rest, ...(sku ? { sku } : {}) }));
+  const product = await Product.create({ ...rest, ...(sku ? { sku } : {}) });
+  logActivity(req.user, 'product_created', `${product.name} at ${product.price}`);
+  res.status(201).json(product);
 }));
 
 router.put('/:id', adminOnly, wrap(async (req, res) => {
   const { sku, ...rest } = clean(req.body);
   const update = sku ? { $set: { ...rest, sku } } : { $set: rest, $unset: { sku: 1 } };
+  const before = await Product.findById(req.params.id).select('name price costPrice stock');
   const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
   if (!product) return res.status(404).json({ message: 'Product not found' });
+  if (before && before.price !== product.price) logActivity(req.user, 'price_changed', `${product.name}: ${before.price} to ${product.price}`);
+  if (before && before.stock !== product.stock) logActivity(req.user, 'stock_changed', `${product.name}: ${before.stock} to ${product.stock}`);
+  logActivity(req.user, 'product_updated', product.name);
   res.json(product);
 }));
 
 router.delete('/:id', adminOnly, wrap(async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (product) logActivity(req.user, 'product_deleted', product.name);
   res.json({ ok: true });
 }));
 

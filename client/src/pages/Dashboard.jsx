@@ -72,6 +72,8 @@ export default function Dashboard() {
   }
 
   const { totals, today, top, payments, recent, lowStock, lowStockCount } = data;
+  const net = totals.profit - totals.expenses;
+  const prevNet = totals.prevProfit - totals.prevExpenses;
   const avg = totals.orders ? totals.revenue / totals.orders : 0;
   const prevAvg = totals.prevOrders ? totals.prevRevenue / totals.prevOrders : 0;
   const payTotal = payments.reduce((s, p) => s + p.total, 0) || 1;
@@ -86,8 +88,8 @@ export default function Dashboard() {
         <Kpi label={`Revenue, ${days} days`} value={money(totals.revenue)} icon="trend" tint="bg-primary/10 text-primary">
           <Delta cur={totals.revenue} prev={totals.prevRevenue} /> <span>vs previous {days} days</span>
         </Kpi>
-        <Kpi label={`Profit, ${days} days`} value={money(totals.profit)} icon="cash" tint="bg-pay/10 text-pay">
-          <Delta cur={totals.profit} prev={totals.prevProfit} /> <span>{totals.revenue ? `· ${((totals.profit / totals.revenue) * 100).toFixed(1)}% margin` : ''}</span>
+        <Kpi label={`Net profit, ${days} days`} value={money(net)} icon="cash" tint="bg-pay/10 text-pay">
+          <Delta cur={net} prev={prevNet} /> <span>· {money(totals.profit)} gross − {money(totals.expenses)} expenses</span>
         </Kpi>
         <Kpi label={`Orders, ${days} days`} value={totals.orders} icon="receipt" tint="bg-ink/10 text-ink">
           <Delta cur={totals.orders} prev={totals.prevOrders} /> <span>vs previous {days} days</span>

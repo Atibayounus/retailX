@@ -7,6 +7,8 @@ import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import customerRoutes from './routes/customers.js';
+import expenseRoutes from './routes/expenses.js';
+import activityRoutes from './routes/activity.js';
 import { rateLimit } from './middleware/rateLimit.js';
 
 if (process.env.USE_GOOGLE_DNS === 'true') dns.setServers(['8.8.8.8', '8.8.4.4']);
@@ -46,6 +48,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/activity', activityRoutes);
 app.use('/api', (req, res) => res.status(404).json({ message: 'Not found' }));
 
 // Clients get clear messages for bad input, never stack traces or database internals

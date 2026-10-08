@@ -10,6 +10,8 @@ import POS from './pages/POS.jsx';
 import Inventory from './pages/Inventory.jsx';
 import Sales from './pages/Sales.jsx';
 import Customers from './pages/Customers.jsx';
+import Expenses from './pages/Expenses.jsx';
+import Activity from './pages/Activity.jsx';
 import Users from './pages/Users.jsx';
 import Account from './pages/Account.jsx';
 import NotFound from './pages/NotFound.jsx';
@@ -48,6 +50,8 @@ export default function App() {
             <Route path="inventory" element={adminOnly(<Inventory />)} />
             <Route path="sales" element={adminOnly(<Sales />)} />
             <Route path="customers" element={<Customers />} />
+            <Route path="expenses" element={adminOnly(<Expenses />)} />
+            <Route path="activity" element={adminOnly(<Activity />)} />
             <Route path="users" element={adminOnly(<Users />)} />
             <Route path="account" element={<Account />} />
             <Route path="reports" element={<Navigate to="/dashboard" replace />} />

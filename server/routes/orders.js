@@ -2,6 +2,8 @@ import { Router } from 'express';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Customer from '../models/Customer.js';
+import Expense from '../models/Expense.js';
+import { logActivity } from '../utils/activity.js';
 import { protect, adminOnly, wrap } from '../middleware/auth.js';
 
 const router = Router();
@@ -83,7 +85,7 @@ router.get('/dashboard', adminOnly, wrap(async (req, res) => {
   // Low stock = at or below each product's own reorder level (5 for products created before that field existed)
   const lowStockFilter = { $expr: { $lte: ['$stock', { $ifNull: ['$reorderLevel', 5] }] } };
 
-  const [daily, top, payments, recent, lowStock, lowStockCount] = await Promise.all([
+  const [daily, top, payments, recent, lowStock, lowStockCount, expenseRows] = await Promise.all([
     Order.aggregate([
       { $match: { createdAt: { $gte: new Date(now - (days * 2 + 1) * DAY) }, status: { $ne: 'refunded' } } },
       { $group: { _id: dayExpr, revenue: { $sum: '$total' }, profit: { $sum: '$profit' }, orders: { $sum: 1 } } },
@@ -97,7 +99,13 @@ router.get('/dashboard', adminOnly, wrap(async (req, res) => {
     Order.find().sort({ createdAt: -1 }).limit(6).populate('cashier', 'name').populate('customer', 'name'),
     Product.find(lowStockFilter).sort({ stock: 1, name: 1 }).limit(8).select('name category stock reorderLevel'),
     Product.countDocuments(lowStockFilter),
+    // Expenses are stored by shop day (YYYY-MM-DD), so the same day keys split current and previous period
+    Expense.aggregate([
+      { $match: { date: { $gte: keys[0] } } },
+      { $group: { _id: { $cond: [{ $gte: ['$date', startKey] }, 'cur', 'prev'] }, total: { $sum: '$amount' } } },
+    ]),
   ]);
+  const expOf = (k) => expenseRows.find((r) => r._id === k)?.total || 0;
 
   const round = (n) => Math.round(n * 100) / 100;
   const byDay = Object.fromEntries(daily.map((d) => [d._id, d]));
@@ -111,6 +119,7 @@ router.get('/dashboard', adminOnly, wrap(async (req, res) => {
     totals: {
       revenue: round(sum(cur, 'revenue')), orders: sum(cur, 'orders'), profit: round(sum(cur, 'profit')),
       prevRevenue: round(sum(prev, 'revenue')), prevOrders: sum(prev, 'orders'), prevProfit: round(sum(prev, 'profit')),
+      expenses: round(expOf('cur')), prevExpenses: round(expOf('prev')),
     },
     today: cur[cur.length - 1],
     top, payments, recent, lowStock, lowStockCount,
@@ -126,6 +135,7 @@ router.post('/:id/refund', adminOnly, wrap(async (req, res) => {
   );
   if (!order) return res.status(400).json({ message: 'Order not found or already refunded' });
   await Promise.all(order.items.map((i) => Product.updateOne({ _id: i.product }, { $inc: { stock: i.qty } })));
+  logActivity(req.user, 'refund', `${order.receiptNo} refunded (${order.total})`);
   res.json(await order.populate([{ path: 'cashier', select: 'name' }, { path: 'customer', select: 'name' }]));
 }));
 

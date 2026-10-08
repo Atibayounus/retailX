@@ -10,10 +10,12 @@ const NAV = [
   { to: '/inventory', label: 'Inventory', icon: 'box', admin: true },
   { to: '/sales', label: 'Sales', icon: 'receipt', admin: true },
   { to: '/customers', label: 'Customers', icon: 'user' },
+  { to: '/expenses', label: 'Expenses', icon: 'wallet', admin: true },
   { to: '/users', label: 'Users', icon: 'users', admin: true },
+  { to: '/activity', label: 'Activity', icon: 'activity', admin: true },
 ];
 const IDLE_MS = 30 * 60 * 1000; // sign out after 30 minutes without activity
-const TITLES = { '/dashboard': 'Dashboard', '/pos': 'Register', '/inventory': 'Inventory', '/sales': 'Sales', '/customers': 'Customers', '/users': 'Users', '/account': 'Account' };
+const TITLES = { '/dashboard': 'Dashboard', '/pos': 'Register', '/inventory': 'Inventory', '/sales': 'Sales', '/customers': 'Customers', '/expenses': 'Expenses', '/activity': 'Activity', '/users': 'Users', '/account': 'Account' };
 
 export default function Layout() {
   const { user, logout } = useAuth();

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Customer from '../models/Customer.js';
 import Order from '../models/Order.js';
 import { protect, adminOnly, wrap } from '../middleware/auth.js';
+import { logActivity } from '../utils/activity.js';
 
 const router = Router();
 router.use(protect);
@@ -57,7 +58,8 @@ router.put('/:id', wrap(async (req, res) => {
 
 // Past receipts keep working: orders just lose the link to the deleted customer
 router.delete('/:id', adminOnly, wrap(async (req, res) => {
-  await Customer.findByIdAndDelete(req.params.id);
+  const customer = await Customer.findByIdAndDelete(req.params.id);
+  if (customer) logActivity(req.user, 'customer_deleted', customer.name);
   await Order.updateMany({ customer: req.params.id }, { $set: { customer: null } });
   res.json({ ok: true });
 }));
