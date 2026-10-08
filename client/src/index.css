@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* retailX palette: black and yellow.
+   bg = page, card = raised surfaces, ink = text (light on dark), primary = yellow, accent = amber,
+   pay = green, void = red (both lightened so they read on black). */
+@theme {
+  --color-bg: #0a0a0a;
+  --color-card: #141414;
+  --color-primary: #ffd60a;
+  --color-accent: #ff9f0a;
+  --color-pay: #4ade80;
+  --color-void: #ff6b6b;
+  --color-ink: #fffbea;
+}
+
+html { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body {
+  background: #0a0a0a;
+  color: #fffbea;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+::selection { background: #ffd60a; color: #0a0a0a; }
+* { scrollbar-color: rgba(255, 251, 234, 0.25) transparent; }
+
+/* Primary surfaces: yellow gradient with dark text */
+.grad-brand { background-image: linear-gradient(135deg, #ffe14d 0%, #ffd60a 55%, #ffb800 100%); background-color: #ffd60a; color: #0a0a0a; }
+.grad-strip { background-image: linear-gradient(90deg, #ffd60a, #ff9f0a); }
+.grad-side { background-image: linear-gradient(180deg, #0a0a0a 0%, #141414 100%); background-color: #0a0a0a; }
+.grad-text { color: #ffd60a; }
+
+/* Surfaces */
+.card { background: #141414; border: 1px solid rgba(255, 251, 234, 0.1); border-radius: 1rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+
+/* Form controls */
+input, select {
+  background: #0d0d0d; color: #fffbea; border: 1px solid rgba(255, 251, 234, 0.2); border-radius: 0.7rem;
+  padding: 0.55rem 0.8rem; outline: none; font-size: 0.9rem; transition: border-color .15s, box-shadow .15s;
+}
+select option { background: #141414; color: #fffbea; }
+input::placeholder { color: rgba(255, 251, 234, 0.38); }
+input:focus, select:focus { border-color: #ffd60a; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.2); }
+button:focus-visible, a:focus-visible { outline: 2px solid #ffd60a; outline-offset: 2px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  border-radius: 0.7rem; padding: 0.55rem 1rem; font-weight: 600; font-size: 0.875rem;
+  border: 1px solid rgba(255, 251, 234, 0.2); background-color: rgba(255, 251, 234, 0.05); color: #fffbea; cursor: pointer; transition: all .15s;
+}
+.btn:hover:not(:disabled) { background-color: rgba(255, 214, 10, 0.1); border-color: rgba(255, 214, 10, 0.55); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background-color: #ffd60a; color: #0a0a0a; border-color: transparent; }
+.btn-primary:hover:not(:disabled) { background-color: #ffe14d; border-color: transparent; }
+.btn-pay { background-color: #4ade80; color: #052e16; border-color: transparent; }
+.btn-pay:hover:not(:disabled) { background-color: #86efac; border-color: transparent; }
+.btn-light { background-color: #0a0a0a; color: #ffd60a; border-color: transparent; }
+.btn-light:hover:not(:disabled) { background-color: #1c1c1c; border-color: transparent; }
+.btn-danger:hover:not(:disabled) { border-color: #ff6b6b; color: #ff6b6b; background-color: rgba(255, 107, 107, 0.1); }
+.btn-danger-solid { background-color: #ff6b6b; color: #2a0505; border-color: transparent; }
+.btn-danger-solid:hover:not(:disabled) { background-color: #ff8585; border-color: transparent; }
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+/* Tables */
+.tbl { width: 100%; text-align: left; border-collapse: collapse; font-size: 0.9rem; }
+.tbl th { padding: .7rem 1rem; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: rgba(255, 251, 234, 0.55); background: rgba(255, 214, 10, 0.06); font-weight: 700; border-bottom: 1px solid rgba(255, 251, 234, 0.1); white-space: nowrap; }
+.tbl td { padding: .75rem 1rem; border-bottom: 1px solid rgba(255, 251, 234, 0.07); }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr.clickable { cursor: pointer; }
+.tbl tbody tr.clickable:hover { background: rgba(255, 214, 10, 0.07); }
+
+/* Components were written with white text on the old brown fills.
+   On the bright yellow/green/red fills the text must be dark instead. */
+.bg-primary.text-white, .bg-accent.text-white, .bg-pay.text-white, .bg-void.text-white { color: #0a0a0a; }
+.grad-brand .text-white, .grad-brand .text-amber-200 { color: #0a0a0a; }
+.grad-brand .bg-white { background-color: #0a0a0a; }
+.grad-brand .bg-white.text-primary { color: #ffd60a; }
+/* Dark surfaces that used bg-ink (sidebar, info toast): ink is now the light text colour */
+.bg-ink.text-white { background-color: #101010; }
+.text-accent { color: #ffd60a; }
+.app-shell > aside { border-right: 1px solid rgba(255, 251, 234, 0.08); }
+
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.toast-in { animation: toast-in .2s ease-out; }
+
+@media print {
+  .app-shell, .app-shell main { height: auto !important; overflow: visible !important; }
+  body * { visibility: hidden; }
+  #receipt, #receipt * { visibility: visible; color: #000 !important; border-color: #999 !important; }
+  #receipt { position: absolute; inset: 0; background: white; padding: 16px; }
+}
