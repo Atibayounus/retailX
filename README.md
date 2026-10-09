@@ -12,7 +12,7 @@
 
 <p align="center">
   <b>A fast, modern point of sale for small shops and cafes.</b><br>
-  Register, inventory, customers, refunds, profit tracking and PDF reports in one clean black-and-yellow app.
+  Register, inventory, customers, refunds, profit tracking and PDF reports in one clean app.
 </p>
 
 ---
